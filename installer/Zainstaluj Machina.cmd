@@ -14,7 +14,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ^
   "$programs=[Environment]::GetFolderPath('Programs');" ^
   "$startDir=Join-Path $programs $appName;" ^
   "New-Item -ItemType Directory -Force -Path $startDir | Out-Null;" ^
-  "$targets=@(Join-Path $desktop ($appName + '.lnk'), Join-Path $startDir ($appName + '.lnk'));" ^
+  "$targets=@((Join-Path -Path $desktop -ChildPath ($appName + '.lnk')), (Join-Path -Path $startDir -ChildPath ($appName + '.lnk')));" ^
   "$shell=New-Object -ComObject WScript.Shell;" ^
   "foreach($target in $targets){ $shortcut=$shell.CreateShortcut($target); $shortcut.TargetPath=$browser; $shortcut.Arguments='--app=' + $appUrl; $shortcut.WorkingDirectory=Split-Path $browser; $shortcut.IconLocation=$browser + ',0'; $shortcut.Description='Machina - zlecenia i czas pracy'; $shortcut.Save() }" ^
   "Write-Host ''; Write-Host 'Machina zostala zainstalowana.' -ForegroundColor Green; Write-Host 'Skrót jest na pulpicie i w menu Start.'; Write-Host ''; Start-Sleep -Seconds 2;"
@@ -31,4 +31,3 @@ echo.
 echo Gotowe. Mozesz zamknac to okno.
 echo.
 pause
-

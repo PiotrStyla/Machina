@@ -7,7 +7,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ^
   "$appName='Machina';" ^
   "$desktop=[Environment]::GetFolderPath('DesktopDirectory');" ^
   "$programs=[Environment]::GetFolderPath('Programs');" ^
-  "$paths=@(Join-Path $desktop ($appName + '.lnk'), Join-Path (Join-Path $programs $appName) ($appName + '.lnk'));" ^
+  "$paths=@((Join-Path -Path $desktop -ChildPath ($appName + '.lnk')), (Join-Path -Path (Join-Path -Path $programs -ChildPath $appName) -ChildPath ($appName + '.lnk')));" ^
   "foreach($path in $paths){ if(Test-Path $path){ Remove-Item -LiteralPath $path -Force } }" ^
   "$startDir=Join-Path $programs $appName;" ^
   "if((Test-Path $startDir) -and -not (Get-ChildItem -LiteralPath $startDir -Force)){ Remove-Item -LiteralPath $startDir -Force }" ^
@@ -25,4 +25,3 @@ echo.
 echo Gotowe. Mozesz zamknac to okno.
 echo.
 pause
-
