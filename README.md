@@ -32,9 +32,15 @@ Uwaga: obecna schema jest trybem MVP dla jednego warsztatu i pozwala klientowi p
 
 ## GitHub Pages
 
-Po każdym pushu na `main` workflow `.github/workflows/pages.yml` buduje aplikację z bazą `/Machina/` i publikuje ją na GitHub Pages:
+Po każdym pushu na `main` workflow `.github/workflows/pages.yml` buduje aplikację z bazą `/Machina/` i publikuje gotowe pliki na branch `gh-pages`.
 
 https://piotrstyla.github.io/Machina/
+
+W ustawieniach repozytorium GitHub ustaw Pages:
+
+1. `Settings` -> `Pages`
+2. `Build and deployment` -> `Deploy from a branch`
+3. Branch: `gh-pages`, folder: `/root`
 
 Jeśli opublikowana wersja ma korzystać z Supabase, dodaj w repozytorium GitHub zmienne Actions:
 
