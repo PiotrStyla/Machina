@@ -32,11 +32,11 @@ Uwaga: obecna schema jest trybem MVP dla jednego warsztatu i pozwala klientowi p
 
 ## GitHub Pages
 
-Po każdym pushu na `main` workflow `.github/workflows/pages.yml` buduje aplikację z bazą `/Machina/` i publikuje gotowe pliki na branch `gh-pages`.
+Opublikowana wersja działa z brancha `gh-pages`, który zawiera gotowy build aplikacji z bazą `/Machina/`.
 
 https://piotrstyla.github.io/Machina/
 
-W ustawieniach repozytorium GitHub ustaw Pages:
+W ustawieniach repozytorium GitHub Pages źródłem powinien być:
 
 1. `Settings` -> `Pages`
 2. `Build and deployment` -> `Deploy from a branch`
