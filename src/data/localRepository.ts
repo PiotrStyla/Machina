@@ -1,4 +1,5 @@
 import { seedData } from "./seed";
+import { normalizeData } from "./normalizeData";
 import type { ActiveTimer, Job, MachinaData, Task, TimeSession } from "../types";
 
 const STORAGE_KEY = "machina.local.v1";
@@ -12,19 +13,23 @@ export const localRepository: MachinaRepository = {
   load() {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) {
-      this.save(seedData);
-      return seedData;
+      const normalized = normalizeData(seedData);
+      this.save(normalized);
+      return normalized;
     }
 
     try {
-      return JSON.parse(stored) as MachinaData;
+      const parsed = normalizeData(JSON.parse(stored) as MachinaData);
+      this.save(parsed);
+      return parsed;
     } catch {
-      this.save(seedData);
-      return seedData;
+      const normalized = normalizeData(seedData);
+      this.save(normalized);
+      return normalized;
     }
   },
   save(data) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizeData(data)));
   },
 };
 

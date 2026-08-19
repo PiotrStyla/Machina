@@ -16,8 +16,30 @@ create table if not exists public.tasks (
   title text not null,
   estimated_minutes integer not null default 0 check (estimated_minutes >= 0),
   status text not null check (status in ('todo', 'in-progress', 'done')),
+  position integer not null default 0 check (position >= 0),
   created_at timestamptz not null default now()
 );
+
+alter table public.tasks
+  add column if not exists position integer not null default 0 check (position >= 0);
+
+with jobs_needing_positions as (
+  select job_id
+  from public.tasks
+  group by job_id
+  having count(*) > 1 and count(distinct position) = 1 and min(position) = 0
+),
+ranked_tasks as (
+  select
+    id,
+    row_number() over (partition by job_id order by created_at, id) - 1 as next_position
+  from public.tasks
+  where job_id in (select job_id from jobs_needing_positions)
+)
+update public.tasks
+set position = ranked_tasks.next_position
+from ranked_tasks
+where public.tasks.id = ranked_tasks.id;
 
 create table if not exists public.time_sessions (
   id text primary key,

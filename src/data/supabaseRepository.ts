@@ -1,5 +1,6 @@
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { seedData } from "./seed";
+import { normalizeData } from "./normalizeData";
 import { supabase } from "./supabaseClient";
 import type { Database } from "./database.types";
 import type { ActiveTimer, Job, MachinaData, Task, TimeSession } from "../types";
@@ -22,7 +23,7 @@ export async function loadSupabaseData(): Promise<MachinaData> {
     error: activeTimerError,
   }] = await Promise.all([
     client.from("jobs").select("*").order("created_at", { ascending: false }),
-    client.from("tasks").select("*").order("created_at", { ascending: true }),
+    client.from("tasks").select("*").order("position", { ascending: true }).order("created_at", { ascending: true }),
     client.from("time_sessions").select("*").order("started_at", { ascending: true }),
     client.from("active_timer").select("*").eq("id", "current").maybeSingle(),
   ]);
@@ -31,17 +32,18 @@ export async function loadSupabaseData(): Promise<MachinaData> {
   if (error) throw error;
 
   if (!jobs || jobs.length === 0) {
-    await saveSupabaseData(seedData);
-    return seedData;
+    const normalized = normalizeData(seedData);
+    await saveSupabaseData(normalized);
+    return normalized;
   }
 
-  return {
+  return normalizeData({
     seededAt: seedData.seededAt,
     jobs: jobs.map(fromJobRow),
     tasks: (tasks ?? []).map(fromTaskRow),
     sessions: (sessions ?? []).map(fromSessionRow),
     activeTimer: activeTimer ? fromActiveTimerRow(activeTimer) : null,
-  };
+  });
 }
 
 export async function saveSupabaseData(data: MachinaData): Promise<void> {
@@ -124,6 +126,7 @@ function toTaskRow(task: Task): TaskRow {
     title: task.title,
     estimated_minutes: task.estimatedMinutes,
     status: task.status,
+    position: task.position,
     created_at: task.createdAt,
   };
 }
@@ -135,6 +138,7 @@ function fromTaskRow(row: TaskRow): Task {
     title: row.title,
     estimatedMinutes: row.estimated_minutes,
     status: row.status,
+    position: row.position,
     createdAt: row.created_at,
   };
 }

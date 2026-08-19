@@ -40,6 +40,7 @@ export const seedData: MachinaData = {
       title: "Przygotowanie materiału",
       estimatedMinutes: 30,
       status: "done",
+      position: 0,
       createdAt: now.toISOString(),
     },
     {
@@ -48,6 +49,7 @@ export const seedData: MachinaData = {
       title: "Ustawienie CNC",
       estimatedMinutes: 60,
       status: "done",
+      position: 1,
       createdAt: now.toISOString(),
     },
     {
@@ -56,6 +58,7 @@ export const seedData: MachinaData = {
       title: "Frezowanie operacja 1",
       estimatedMinutes: 180,
       status: "todo",
+      position: 2,
       createdAt: now.toISOString(),
     },
     {
@@ -64,6 +67,7 @@ export const seedData: MachinaData = {
       title: "Kontrola wymiarów",
       estimatedMinutes: 60,
       status: "todo",
+      position: 3,
       createdAt: now.toISOString(),
     },
     {
@@ -72,6 +76,7 @@ export const seedData: MachinaData = {
       title: "Programowanie ścieżek",
       estimatedMinutes: 70,
       status: "todo",
+      position: 0,
       createdAt: now.toISOString(),
     },
     {
@@ -80,6 +85,7 @@ export const seedData: MachinaData = {
       title: "Frezowanie kieszeni",
       estimatedMinutes: 170,
       status: "todo",
+      position: 1,
       createdAt: now.toISOString(),
     },
   ],

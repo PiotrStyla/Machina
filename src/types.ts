@@ -19,6 +19,7 @@ export interface Task {
   title: string;
   estimatedMinutes: number;
   status: TaskStatus;
+  position: number;
   createdAt: string;
 }
 

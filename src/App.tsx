@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { ActiveTimer, Job, JobStatus, MachinaData, Task, TaskStatus, TimeSession } from "./types";
+import { sortTasks } from "./data/normalizeData";
 import { createId, localRepository, nextJobNumber } from "./data/localRepository";
 import { isSupabaseConfigured } from "./data/supabaseClient";
 import { loadSupabaseData, saveSupabaseData, subscribeToSupabaseChanges } from "./data/supabaseRepository";
@@ -33,6 +34,13 @@ const emptyTaskDraft: TaskDraft = {
   title: "",
   estimatedTime: "",
 };
+
+const defaultTaskTemplates: TaskDraft[] = [
+  { title: "zamówienie materiału", estimatedTime: "" },
+  { title: "programowanie", estimatedTime: "" },
+  { title: "obróbka", estimatedTime: "" },
+  { title: "kontrola wymiarowa", estimatedTime: "" },
+];
 
 const statusLabels: Record<JobStatus, string> = {
   active: "Aktywne",
@@ -137,6 +145,7 @@ function App() {
     const title = draft.title.trim();
     if (!title) return false;
 
+    const createdAt = new Date();
     const job: Job = {
       id: createId("job"),
       number: nextJobNumber(data.jobs),
@@ -146,10 +155,11 @@ function App() {
       status: "active",
       deadline: draft.deadline,
       estimatedMinutes: inputToMinutes(draft.estimatedTime),
-      createdAt: new Date().toISOString(),
+      createdAt: createdAt.toISOString(),
     };
+    const defaultTasks = createDefaultTasks(job.id, createdAt);
 
-    updateData((current) => ({ ...current, jobs: [job, ...current.jobs] }));
+    updateData((current) => ({ ...current, jobs: [job, ...current.jobs], tasks: [...current.tasks, ...defaultTasks] }));
     setSelectedJobId(null);
     setView("jobs");
     return true;
@@ -181,16 +191,19 @@ function App() {
     const title = draft.title.trim();
     if (!title) return false;
 
-    const task: Task = {
-      id: createId("task"),
-      jobId,
-      title,
-      estimatedMinutes: inputToMinutes(draft.estimatedTime),
-      status: "todo",
-      createdAt: new Date().toISOString(),
-    };
+    updateData((current) => {
+      const task: Task = {
+        id: createId("task"),
+        jobId,
+        title,
+        estimatedMinutes: inputToMinutes(draft.estimatedTime),
+        status: "todo",
+        position: getNextTaskPosition(current.tasks, jobId),
+        createdAt: new Date().toISOString(),
+      };
 
-    updateData((current) => ({ ...current, tasks: [...current.tasks, task] }));
+      return { ...current, tasks: [...current.tasks, task] };
+    });
     return true;
   }
 
@@ -272,6 +285,29 @@ function App() {
     }));
   }
 
+  function moveTask(taskId: string, direction: -1 | 1) {
+    updateData((current) => {
+      const task = current.tasks.find((item) => item.id === taskId);
+      if (!task) return current;
+
+      const jobTasks = sortTasks(current.tasks.filter((item) => item.jobId === task.jobId));
+      const currentIndex = jobTasks.findIndex((item) => item.id === taskId);
+      const nextIndex = currentIndex + direction;
+      if (currentIndex < 0 || nextIndex < 0 || nextIndex >= jobTasks.length) return current;
+
+      const reordered = [...jobTasks];
+      [reordered[currentIndex], reordered[nextIndex]] = [reordered[nextIndex], reordered[currentIndex]];
+      const positions = new Map(reordered.map((item, position) => [item.id, position]));
+
+      return {
+        ...current,
+        tasks: current.tasks.map((item) =>
+          positions.has(item.id) ? { ...item, position: positions.get(item.id)! } : item
+        ),
+      };
+    });
+  }
+
   function setJobStatus(jobId: string, status: JobStatus) {
     updateData((current) => ({
       ...current,
@@ -313,7 +349,7 @@ function App() {
         {(view === "jobs" || view === "completed") && selectedJob ? (
           <JobDetail
             job={selectedJob}
-            tasks={data.tasks.filter((task) => task.jobId === selectedJob.id)}
+            tasks={sortTasks(data.tasks.filter((task) => task.jobId === selectedJob.id))}
             sessions={data.sessions}
             activeTimer={data.activeTimer}
             now={now}
@@ -324,6 +360,7 @@ function App() {
             onCompleteTask={completeTask}
             onReopenTask={reopenTask}
             onEditTask={(taskId) => setEditingTaskId(taskId)}
+            onMoveTask={moveTask}
             onStatusChange={setJobStatus}
             onCloseJob={closeJob}
             onEdit={() => {
@@ -542,6 +579,7 @@ interface JobDetailProps {
   onCompleteTask: (taskId: string) => void;
   onReopenTask: (taskId: string) => void;
   onEditTask: (taskId: string) => void;
+  onMoveTask: (taskId: string, direction: -1 | 1) => void;
   onStatusChange: (jobId: string, status: JobStatus) => void;
   onCloseJob: (jobId: string) => void;
   onEdit: () => void;
@@ -560,6 +598,7 @@ function JobDetail({
   onCompleteTask,
   onReopenTask,
   onEditTask,
+  onMoveTask,
   onStatusChange,
   onCloseJob,
   onEdit,
@@ -603,14 +642,38 @@ function JobDetail({
           <span>Status</span>
           <span>Akcja</span>
         </div>
-        {tasks.map((task) => {
+        {tasks.map((task, index) => {
           const isActive = activeTimer?.taskId === task.id;
           const elapsedSeconds = getTaskActualSeconds(task.id, sessions, activeTimer, now);
           return (
             <div className={`task-row ${isActive ? "is-active" : ""}`} key={task.id}>
               <span className="task-main">
-                <strong>{task.title}</strong>
-                <small>{task.estimatedMinutes ? `Plan: ${minutesToLabel(task.estimatedMinutes)}` : "Plan: brak"}</small>
+                <span className="task-order-controls" aria-label={`Kolejność czynności: ${task.title}`}>
+                  <button
+                    type="button"
+                    className="order-button"
+                    disabled={index === 0}
+                    onClick={() => onMoveTask(task.id, -1)}
+                    aria-label="Przesuń czynność wyżej"
+                    title="Przesuń wyżej"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    type="button"
+                    className="order-button"
+                    disabled={index === tasks.length - 1}
+                    onClick={() => onMoveTask(task.id, 1)}
+                    aria-label="Przesuń czynność niżej"
+                    title="Przesuń niżej"
+                  >
+                    ↓
+                  </button>
+                </span>
+                <span className="task-title-copy">
+                  <strong>{task.title}</strong>
+                  <small>{task.estimatedMinutes ? `Plan: ${minutesToLabel(task.estimatedMinutes)}` : "Plan: brak"}</small>
+                </span>
               </span>
               <span>{minutesToLabel(task.estimatedMinutes)}</span>
               <span>{secondsToShort(elapsedSeconds)}</span>
@@ -971,6 +1034,24 @@ function TimeReport({ data }: { data: MachinaData }) {
       </div>
     </section>
   );
+}
+
+function createDefaultTasks(jobId: string, jobCreatedAt: Date): Task[] {
+  return defaultTaskTemplates.map((template, position) => ({
+    id: createId("task"),
+    jobId,
+    title: template.title,
+    estimatedMinutes: inputToMinutes(template.estimatedTime),
+    status: "todo",
+    position,
+    createdAt: new Date(jobCreatedAt.getTime() + position).toISOString(),
+  }));
+}
+
+function getNextTaskPosition(tasks: Task[], jobId: string): number {
+  const jobTasks = tasks.filter((task) => task.jobId === jobId);
+  if (jobTasks.length === 0) return 0;
+  return Math.max(...jobTasks.map((task) => task.position)) + 1;
 }
 
 function getActiveContext(data: MachinaData): { job: Job; task: Task } | null {

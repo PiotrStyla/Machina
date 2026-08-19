@@ -44,6 +44,7 @@ export interface Database {
           title: string;
           estimated_minutes: number;
           status: "todo" | "in-progress" | "done";
+          position: number;
           created_at: string;
         };
         Insert: {
@@ -52,6 +53,7 @@ export interface Database {
           title: string;
           estimated_minutes?: number;
           status: "todo" | "in-progress" | "done";
+          position?: number;
           created_at?: string;
         };
         Update: {
@@ -60,6 +62,7 @@ export interface Database {
           title?: string;
           estimated_minutes?: number;
           status?: "todo" | "in-progress" | "done";
+          position?: number;
           created_at?: string;
         };
         Relationships: [];

@@ -28,6 +28,8 @@ VITE_SUPABASE_ANON_KEY=your-publishable-or-anon-key
 
 Po konfiguracji dane są zapisywane w Supabase i odświeżane przez Realtime, więc telefon i laptop widzą ten sam stan.
 
+Po aktualizacjach aplikacji możesz ponownie uruchomić `supabase/schema.sql` w SQL Editorze. Plik jest idempotentny i dopina brakujące kolumny, np. kolejność czynności.
+
 Uwaga: obecna schema jest trybem MVP dla jednego warsztatu i pozwala klientowi przeglądarkowemu czytać/zapisywać wspólne dane przez klucz publiczny. Przed realnym użyciem z danymi klientów warto dodać Supabase Auth i polityki RLS oparte o `workspace_id`.
 
 ## GitHub Pages

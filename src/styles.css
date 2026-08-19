@@ -314,6 +314,7 @@ h2 {
   font-weight: 680;
   background: #eceff1;
   color: #242a2f;
+  white-space: nowrap;
 }
 
 .status-active,
@@ -442,6 +443,42 @@ textarea:focus {
 
 .task-row.is-active {
   box-shadow: inset 4px 0 0 var(--accent);
+}
+
+.task-main {
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+}
+
+.task-title-copy {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.task-order-controls {
+  display: grid;
+  gap: 4px;
+  width: 30px;
+}
+
+.order-button {
+  width: 30px;
+  height: 28px;
+  min-height: 0;
+  border: 1px solid #cfd5da;
+  border-radius: var(--radius);
+  background: #ffffff;
+  color: var(--ink);
+  line-height: 1;
+  font-size: 15px;
+  font-weight: 760;
+  padding: 0;
+}
+
+.order-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
 }
 
 .task-actions {
@@ -646,6 +683,46 @@ textarea:focus {
   display: none;
 }
 
+@media (max-width: 1200px) {
+  .app-shell {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+
+  .main {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .job-list-head,
+  .job-row {
+    grid-template-columns: minmax(180px, 2fr) minmax(92px, 0.9fr) minmax(82px, 0.75fr) 72px 86px minmax(90px, 0.8fr) 112px;
+    gap: 10px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .status {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+
+  .task-list-head,
+  .task-row {
+    grid-template-columns: minmax(210px, 1.6fr) 76px 92px 96px minmax(250px, auto);
+    gap: 12px;
+  }
+
+  .task-actions {
+    gap: 6px;
+  }
+
+  .task-actions button {
+    min-width: 78px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
 @media (max-width: 900px) {
   .app-shell {
     display: block;
@@ -748,6 +825,14 @@ textarea:focus {
     min-width: 94px;
     min-height: 48px;
     padding: 0 10px;
+  }
+
+  .task-row .order-button {
+    grid-column: auto;
+    grid-row: auto;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
   }
 
   .close-job-panel {
