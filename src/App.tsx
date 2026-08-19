@@ -551,17 +551,19 @@ function JobRow({ job, tasks, sessions, activeTimer, now, onOpen }: JobRowProps)
         <strong>#{job.number} · {job.title}</strong>
         <small>{job.description || "Bez opisu"}</small>
       </span>
-      <span>{job.client || "Bez klienta"}</span>
-      <span>Termin {dateShort(job.deadline)}</span>
-      <span>{minutesToLabel(job.estimatedMinutes)}</span>
-      <span>{secondsToShort(actualSeconds)}</span>
-      <span className="progress-cell">
+      <span className="job-client" data-label="Klient">{job.client || "Bez klienta"}</span>
+      <span className="job-deadline" data-label="Termin">Termin {dateShort(job.deadline)}</span>
+      <span className="job-plan" data-label="Plan">{minutesToLabel(job.estimatedMinutes)}</span>
+      <span className="job-actual" data-label="Wykonano">{secondsToShort(actualSeconds)}</span>
+      <span className="progress-cell" data-label="Postęp">
         <span>{progress}%</span>
         <span className="progress-track">
           <span style={{ width: `${progress}%` }} />
         </span>
       </span>
-      <span className={`status status-${job.status}`}>{statusLabels[job.status]}</span>
+      <span className="job-status-cell" data-label="Status">
+        <span className={`status status-${job.status}`}>{statusLabels[job.status]}</span>
+      </span>
     </button>
   );
 }

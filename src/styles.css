@@ -252,6 +252,10 @@ h2 {
   font-size: 14px;
 }
 
+.job-row > span {
+  min-width: 0;
+}
+
 .job-row:hover {
   background: #fbfcfc;
 }
@@ -289,6 +293,11 @@ h2 {
 .progress-cell {
   display: grid;
   gap: 7px;
+}
+
+.job-status-cell {
+  display: flex;
+  justify-content: flex-start;
 }
 
 .progress-track {
@@ -683,6 +692,70 @@ textarea:focus {
   display: none;
 }
 
+@media (max-width: 1500px) {
+  .job-list-head {
+    display: none;
+  }
+
+  .job-row {
+    grid-template-columns: minmax(220px, 1.35fr) minmax(120px, 0.75fr) minmax(120px, 0.75fr) minmax(118px, 0.7fr);
+    grid-template-areas:
+      "title client deadline status"
+      "title plan actual progress";
+    gap: 14px 18px;
+    min-height: 0;
+    padding: 18px 22px;
+    align-items: start;
+  }
+
+  .job-title {
+    grid-area: title;
+    align-self: center;
+  }
+
+  .job-client {
+    grid-area: client;
+  }
+
+  .job-deadline {
+    grid-area: deadline;
+  }
+
+  .job-plan {
+    grid-area: plan;
+  }
+
+  .job-actual {
+    grid-area: actual;
+  }
+
+  .progress-cell {
+    grid-area: progress;
+  }
+
+  .job-status-cell {
+    grid-area: status;
+  }
+
+  .job-row > span:not(.job-title) {
+    display: grid;
+    gap: 5px;
+    color: var(--ink);
+  }
+
+  .job-row > span:not(.job-title)::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 780;
+    text-transform: uppercase;
+  }
+
+  .job-status-cell {
+    justify-items: start;
+  }
+}
+
 @media (max-width: 1200px) {
   .app-shell {
     grid-template-columns: 220px minmax(0, 1fr);
@@ -691,14 +764,6 @@ textarea:focus {
   .main {
     padding-left: 24px;
     padding-right: 24px;
-  }
-
-  .job-list-head,
-  .job-row {
-    grid-template-columns: minmax(180px, 2fr) minmax(92px, 0.9fr) minmax(82px, 0.75fr) 72px 86px minmax(90px, 0.8fr) 112px;
-    gap: 10px;
-    padding-left: 16px;
-    padding-right: 16px;
   }
 
   .status {
@@ -755,6 +820,14 @@ textarea:focus {
 
   .job-row {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      "title"
+      "status"
+      "client"
+      "deadline"
+      "plan"
+      "actual"
+      "progress";
     gap: 10px;
     min-height: 0;
     padding: 18px 16px;
@@ -764,7 +837,7 @@ textarea:focus {
     min-width: 0;
   }
 
-  .job-row > span:not(.job-title):not(.progress-cell):not(.status) {
+  .job-row > span:not(.job-title):not(.progress-cell):not(.job-status-cell) {
     color: var(--muted);
   }
 
