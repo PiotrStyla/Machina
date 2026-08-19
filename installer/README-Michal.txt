@@ -9,6 +9,8 @@ Machina - instalacja dla Windows
 
 Instalator nie wymaga konta programisty, terminala ani pnpm.
 Do dzialania potrzebny jest Microsoft Edge albo Google Chrome.
+Instalator uruchamia Machina w osobnym profilu aplikacji, zeby uniknac
+problemow ze starym cache przegladarki.
 
 Adres aplikacji:
 https://piotrstyla.github.io/Machina/
@@ -21,3 +23,7 @@ Odinstalowanie:
 Kliknij dwa razy plik:
 Odinstaluj Machina.cmd
 
+Jesli aplikacja otwiera sie jako puste biale okno:
+1. Zamknij okno Machina.
+2. Uruchom ponownie Zainstaluj Machina.cmd z najnowszej paczki ZIP.
+3. Otworz Machina jeszcze raz ze skrotu na pulpicie albo z menu Start.
