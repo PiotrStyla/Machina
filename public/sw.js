@@ -1,5 +1,12 @@
-const CACHE_NAME = "machina-v1";
-const APP_SHELL = ["/", "/index.html", "/manifest.webmanifest", "/icon.svg"];
+const CACHE_NAME = "machina-v2";
+const scopePath = new URL(self.registration.scope).pathname;
+const basePath = scopePath.endsWith("/") ? scopePath : `${scopePath}/`;
+const APP_SHELL = [
+  basePath,
+  `${basePath}index.html`,
+  `${basePath}manifest.webmanifest`,
+  `${basePath}icon.svg`,
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
@@ -27,7 +34,7 @@ self.addEventListener("fetch", (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
           return response;
         })
-        .catch(() => caches.match("/index.html"));
+        .catch(() => caches.match(`${basePath}index.html`));
     })
   );
 });

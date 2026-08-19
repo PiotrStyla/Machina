@@ -2,13 +2,14 @@
   "name": "Machina",
   "short_name": "Machina",
   "description": "Proste zarzadzanie zleceniami i czasem w warsztacie CNC.",
-  "start_url": "/",
+  "start_url": ".",
+  "scope": ".",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#080a0c",
   "icons": [
     {
-      "src": "/icon.svg",
+      "src": "icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
