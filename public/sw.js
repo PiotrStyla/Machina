@@ -1,4 +1,4 @@
-const CACHE_NAME = "machina-v2";
+const CACHE_NAME = "machina-v3";
 const scopePath = new URL(self.registration.scope).pathname;
 const basePath = scopePath.endsWith("/") ? scopePath : `${scopePath}/`;
 const APP_SHELL = [
@@ -24,6 +24,19 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          return response;
+        })
+        .catch(() => caches.match(event.request).then((cached) => cached ?? caches.match(`${basePath}index.html`)))
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then((cached) => {
