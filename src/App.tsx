@@ -268,6 +268,26 @@ function App() {
     updateData((current) => finishActiveSession(current));
   }
 
+  function addOfflineTime(taskId: string, minutes: number) {
+    const durationSeconds = minutes * 60;
+    updateData((current) => {
+      const stoppedAt = new Date();
+      const startedAt = new Date(stoppedAt.getTime() - durationSeconds * 1000);
+      const session: TimeSession = {
+        id: createId("session"),
+        taskId,
+        startedAt: startedAt.toISOString(),
+        stoppedAt: stoppedAt.toISOString(),
+        durationSeconds,
+      };
+
+      return {
+        ...current,
+        sessions: [...current.sessions, session],
+      };
+    });
+  }
+
   function completeTask(taskId: string) {
     updateData((current) => {
       const stopped = current.activeTimer?.taskId === taskId ? finishActiveSession(current) : current;
@@ -442,7 +462,9 @@ function App() {
       {editingTaskId && (
         <TaskModal
           task={data.tasks.find((task) => task.id === editingTaskId) ?? null}
+          actualSeconds={getTaskActualSeconds(editingTaskId, data.sessions, data.activeTimer, now)}
           onClose={() => setEditingTaskId(null)}
+          onAddOfflineTime={(taskId) => addOfflineTime(taskId, 15)}
           onUpdate={(taskId, draft) => {
             const updated = updateTask(taskId, draft);
             if (updated) setEditingTaskId(null);
@@ -725,11 +747,15 @@ function JobDetail({
 
 function TaskModal({
   task,
+  actualSeconds,
   onClose,
+  onAddOfflineTime,
   onUpdate,
 }: {
   task: Task | null;
+  actualSeconds: number;
   onClose: () => void;
+  onAddOfflineTime: (taskId: string) => void;
   onUpdate: (taskId: string, draft: TaskDraft) => boolean;
 }) {
   const [draft, setDraft] = useState<TaskDraft>(() =>
@@ -741,6 +767,7 @@ function TaskModal({
       : emptyTaskDraft
   );
   const [error, setError] = useState("");
+  const [offlineAddedCount, setOfflineAddedCount] = useState(0);
 
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -750,6 +777,12 @@ function TaskModal({
       return;
     }
     if (onUpdate(task.id, draft)) setError("");
+  }
+
+  function addQuarterHour() {
+    if (!task) return;
+    onAddOfflineTime(task.id);
+    setOfflineAddedCount((count) => count + 1);
   }
 
   if (!task) return null;
@@ -777,6 +810,16 @@ function TaskModal({
             placeholder="np. 60 min"
           />
         </label>
+        <section className="offline-time-panel" aria-label="Czas offline">
+          <div>
+            <strong>Czas poza stoperem</strong>
+            <span>Wykonano łącznie: {secondsToShort(actualSeconds)}</span>
+            {offlineAddedCount > 0 && <small>Dodano teraz: +{offlineAddedCount * 15} min</small>}
+          </div>
+          <button type="button" className="secondary-button offline-time-button" onClick={addQuarterHour}>
+            +15 min offline
+          </button>
+        </section>
         {error && <p className="form-error">{error}</p>}
         <button className="primary-button full-width">Zapisz czynność</button>
       </form>
